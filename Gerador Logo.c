@@ -10,9 +10,18 @@ void main(){
 	int ret = 0, i = 0,j = 0;
 	char *p = NULL;
 	char caminho[100];
+	char nome[100];
+	char resp;
+	int ctr2 = 0;
+	int ctr = 0;
+	FILE *formFile = NULL;
+
    
     //Definição do arquivo que será formatado.
-	printf("File Name:");
+	
+	
+	
+	printf("File Path: ");
 	gets(caminho);	
 	
 	
@@ -22,19 +31,78 @@ void main(){
 	//Caso a função retorne erro.
 	if(ret < 0)
 	{
-		printf("no data to read");
+		printf("\nWrong path or fille name. Try again.\n\n");
+		main();
 	}
-	
+
 	//Caso retorne sucesso.
 	else
 	{
-		//Imprime os dados do arquivo
-		printf("file content [%s]\n\n\n", p);
+	
+	//Parte de definição do nome de arquivo de saida		
+	do{
+		//solicita o nome do arquivo desejado pelo usuario
+		printf("\nDefine the formated name(default: logo): ");
+		gets(nome);
+		//limpa o buffer do teclado
+		fflush(stdin);
+		
+		//caso o usuario não digite um valor, ele saira com o nome logo.txt
+		if( (strcmp(nome, "")) == 0 ){
+			strcat(nome, "logo.txt");
+		}
+		
+		//pega o nome que o usuario definiu e adiciona a extenção ".txt"
+		else{
+		strcat(nome, ".txt");
+					
+			
+		}
+		
+		//Verificar se ja possui um arquivo com aquele nome no diretorio.
+		if((formFile = fopen(nome, "r")) != NULL ){
+			do{
+				
+				//caso encontre um arquivo com o mesmo nome, pergunta se deseja sobreescrever o arquivo original ou não
+				printf("\n%s File name already exist, overwrite?\n Y/N ", nome);
+				scanf("%c", &resp);
+				fflush(stdin);
+					if (resp == 'Y' || resp == 'y'){ 
+						ctr2 =1;
+						ctr=1;
+						
+					
+				}
+				
+				 else if(resp == 'n' || resp == 'N' )
+				 ctr2 = 1;
+				 
+				 //Quando o usuario insere um caracter não previsto
+				 else
+				 printf("\n Invalid answer \n");
+			}while(ctr2 == 0);
+		}
+		else
+		ctr=1;
+		
+		
+	
+		fclose(formFile);
+	
+		
+	}while(ctr == 0);
+	ctr=0;
+	ctr2=0;
+		
+		/*//Imprime os dados do arquivo
+		printf("file content [%s]\n\n\n", p);*/
+		
+		//Informa o Inicio do processo
+		printf("\nFormating Fille...\n");
 		
 		//definição dos vetores auxiliares
 		char *aux = NULL;// vetor que irá receber o texto sem formatação
     	char txt[strlen(p)];//vetor que irá receber o texto formatado
-    	
 		//Passa os dados do arquivo para a variavel auxiliar a partir do caracter '='
 		aux = strstr(p, "=");
 		
@@ -58,13 +126,13 @@ void main(){
 		}
 		
 		
-		//informa os dados depois de formatados
-		printf("Formatted Data: %s\n", txt);
+		/*//informa os dados depois de formatados
+		printf("Formatted Data: %s\n", txt);*/
 	
-		printf("Creating File\n"); 
+		printf("\nCreating File...\n"); 
 		
 		//chamada da função para criar o arquivo txt
-		ret = pgWriteFile(strlen(txt), txt, "logox2.txt");
+		ret = pgWriteFile(strlen(txt), txt, nome);
 		
 		//caso retorne erro
 		if(ret = 0)
@@ -72,21 +140,48 @@ void main(){
 		
 		//casso retone sucesso
 		else
-		printf("File created.\nFile Name: logox2.txt \n");
-		system("pause");
-	
-	    //limpa a memoria do vetor
-	    free(p);
-	    free(aux);
+		printf("\nFile created.\nFile Name: 'Formated Fille.txt'.");
+		printf("\nCleaning pointers\n.... ");
 		
+		//Limpa ponteiros com dados do arquivo ja formatado
+	    free(p);
+	    strcpy(aux, ""); 
+	    
+	    //Pergunta se deseja formatar um outro arquivo.
+	do{
+		
+		printf("\nAnother fille?\n Y/N: ");
+		scanf("%c", &resp);
+		//caso o usuario deseje formatar mais um arquivo, retorna para o inicio da aplicação.
+		if (resp == 'Y' || resp == 'y'){
+			main();
+			break;
+		}
+		
+		//caso nao tenha mais arquivo para formatar, encerra o aplicativo
+		else if(resp == 'n' || resp == 'N'){
+			printf("closing app...");
+			ctr = 1;
+		}
+		//caso o usuario digite um caracter não previsto
+		else{
+			printf("\nInvalid answer \n");
+		 }
+		 fflush(stdin);
+	}while(ctr == 0);
+		ctr=0;
+
 	}
-
-
-
-
-
-
 }
+	
+	
+		
+
+
+
+
+
+
 
 
 int pgFileSize(FILE *fp) {
@@ -142,14 +237,14 @@ int pgWriteFile(int contentLen, const char *content, char *filename)
 	char _filename[128];
 	va_list args;
 	FILE *fileret = NULL;
-
+	
 
 		if ((fileret = fopen(filename, "w+")) == NULL){
 			printf("Erro [%i] fopen '%s' file. Errno [%i]", filehandle, _filename, errno);
 			return -1;
 		}
 
-
+	
 
 	if ((ret = fwrite(content, 1, contentLen, fileret)) < 0){
 		printf("Error [%i] fwrite '%s' file. Lenght [%i]. Errno [%i]", ret, _filename, contentLen, errno);
