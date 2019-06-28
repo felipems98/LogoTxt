@@ -5,6 +5,7 @@
 int pgFileSize(FILE *fp);
 int pgReadFile(char **response, char *filename); 
 int criarArquivo(char texto);
+void setDirectory(char *path);
 
 void main(){
 	int ret = 0, i = 0,j = 0;
@@ -14,6 +15,7 @@ void main(){
 	char resp;
 	int ctr2 = 0;
 	int ctr = 0;
+	char auxDirec = "\\";
 	FILE *formFile = NULL;
 
    
@@ -22,7 +24,7 @@ void main(){
 	
 	
 	printf("File Path: ");
-	gets(caminho);	
+	gets(caminho);
 	
 	
 	//Chamada da função para pegar os dados do arquivo.
@@ -121,6 +123,8 @@ void main(){
 					//}
 		 		
 				}
+				else 
+				continue;
 	
 		
 		}
@@ -130,18 +134,35 @@ void main(){
 		printf("Formatted Data: %s\n", txt);*/
 	
 		printf("\nCreating File...\n"); 
+		printf("%s",caminho);
+		
 		
 		//chamada da função para criar o arquivo txt
-		ret = pgWriteFile(strlen(txt), txt, nome);
+		if(strstr(caminho, "\\")!=NULL){
+			setDirectory(caminho);
+			
+			strcat(caminho, nome);
+			printf("%s", caminho);
+			system("pause");
+			ret = pgWriteFile(strlen(txt), txt, caminho);
+			
+			
+			
+		}	
+		else{
+				ret = pgWriteFile(strlen(txt), txt, nome);
+			
+		}
 		
 		//caso retorne erro
 		if(ret = 0)
-		printf("Failed to created file.");
-		
+			printf("Failed to created file.");
+			
 		//casso retone sucesso
 		else
-		printf("\nFile created.\nFile Name: 'Formated Fille.txt'.");
-		printf("\nCleaning pointers\n.... ");
+			printf("\nFile created.\nFile Name: 'Formated Fille.txt'.");
+			printf("\nCleaning pointers\n.... ");
+	
 		
 		//Limpa ponteiros com dados do arquivo ja formatado
 	    free(p);
@@ -257,3 +278,20 @@ printf("Saved %i bytes", ret);
 	return 0;
 }
 
+void setDirectory(char *path){
+	char *p1 = path;
+	char *p2 = &path[strlen(path) - 1];
+
+	while (p2[0] != '\\') {
+		p2--;
+	}
+
+	char finalPath[128];
+	memset(finalPath, 0, sizeof(finalPath));
+	strncpy(finalPath, p1, p2 - p1);
+	strcat(finalPath, "\\");
+	printf("%s", finalPath);
+	strcpy(path, finalPath);
+	printf("%s", path);
+	system("pause");
+}
