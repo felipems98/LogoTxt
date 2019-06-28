@@ -23,7 +23,7 @@ void main(){
 	
 	
 	
-	printf("File Path: ");
+	printf("\nFile Path: ");
 	gets(caminho);
 	
 	
@@ -44,7 +44,7 @@ void main(){
 	//Parte de definição do nome de arquivo de saida		
 	do{
 		//solicita o nome do arquivo desejado pelo usuario
-		printf("\nDefine the formated name(default: logo): ");
+		printf("\n\nDefine the formated name(default: logo): ");
 		gets(nome);
 		//limpa o buffer do teclado
 		fflush(stdin);
@@ -54,39 +54,78 @@ void main(){
 			strcat(nome, "logo.txt");
 		}
 		
+		
 		//pega o nome que o usuario definiu e adiciona a extenção ".txt"
 		else{
-		strcat(nome, ".txt");
+			strcat(nome, ".txt");
 					
 			
 		}
 		
-		//Verificar se ja possui um arquivo com aquele nome no diretorio.
-		if((formFile = fopen(nome, "r")) != NULL ){
-			do{
-				
-				//caso encontre um arquivo com o mesmo nome, pergunta se deseja sobreescrever o arquivo original ou não
-				printf("\n%s File name already exist, overwrite?\n Y/N ", nome);
-				scanf("%c", &resp);
-				fflush(stdin);
-					if (resp == 'Y' || resp == 'y'){ 
-						ctr2 =1;
-						ctr=1;
-						
+			//Caso o arquivo for citado em um diretorio fora da origem do programa executado, chama a função para retirar
+			//o nome do arquivo original e manter apenas o diretorio, para concatenar com o nome do arquivo de saida.
+			if(strstr(caminho, "\\")!=NULL){
+				//função que mantem apenas o diretorio.
+				setDirectory(caminho);
+				strcat(caminho, nome);
+					if((formFile = fopen(caminho, "r")) != NULL ){
+						do{
 					
-				}
-				
-				 else if(resp == 'n' || resp == 'N' )
-				 ctr2 = 1;
-				 
-				 //Quando o usuario insere um caracter não previsto
-				 else
-				 printf("\n Invalid answer \n");
-			}while(ctr2 == 0);
+							//caso encontre um arquivo com o mesmo nome, pergunta se deseja sobreescrever o arquivo original ou não
+							printf("\n%s File name already exist in this directory, overwrite?\n Y/N ", nome);
+							scanf("%c", &resp);
+							fflush(stdin);
+							//Caso responda sim, sai do loop e prossegue com a criação do arquivo para sobrescrever o original
+								if (resp == 'Y' || resp == 'y'){ 
+									ctr2 =1;
+									ctr=1;
+									
+								
+							}
+							//caso responda nao, manda de volta para a seleção do nome do arquivo
+							 else if(resp == 'n' || resp == 'N' )
+							 ctr2 = 1;
+							 
+							 //Quando o usuario insere um caracter não previsto
+							 else
+							 printf("\n Invalid answer \n");
+						}while(ctr2 == 0);
+					}
+					else
+			ctr=1;
+			}
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//Verificar se ja possui um arquivo com aquele nome no diretorio.
+		else{
+				if((formFile = fopen(nome, "r")) != NULL ){
+					do{
+						
+						//caso encontre um arquivo com o mesmo nome, pergunta se deseja sobreescrever o arquivo original ou não
+						printf("\n%s File name already exist, overwrite?\n Y/N ", nome);
+						scanf("%c", &resp);
+						fflush(stdin);
+						//Caso responda sim, sai do loop e prossegue com a criação do arquivo para sobrescrever o original
+							if (resp == 'Y' || resp == 'y'){ 
+								ctr2 =1;
+								ctr=1;
+								
+							
+						}
+						//caso responda nao, manda de volta para a seleção do nome do arquivo
+						
+						 else if(resp == 'n' || resp == 'N' )
+						 ctr2 = 1;
+						 
+						 //Quando o usuario insere um caracter não previsto
+						 else
+						 printf("\n Invalid answer \n");
+					}while(ctr2 == 0);
 		}
 		else
 		ctr=1;
-		
+	}
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 	
 		fclose(formFile);
@@ -106,7 +145,10 @@ void main(){
 		char *aux = NULL;// vetor que irá receber o texto sem formatação
     	char txt[strlen(p)];//vetor que irá receber o texto formatado
 		//Passa os dados do arquivo para a variavel auxiliar a partir do caracter '='
-		aux = strstr(p, "=");
+		if((aux = strstr(p, "=")) == NULL){
+			printf("\n\nInvalid file to format, try again\n\n");
+			main();
+		}
 		
 	
 	
@@ -134,31 +176,30 @@ void main(){
 		printf("Formatted Data: %s\n", txt);*/
 	
 		printf("\nCreating File...\n"); 
-		printf("%s",caminho);
 		
 		
 		//chamada da função para criar o arquivo txt
+		
+		//caso arquivo esteja fora do diretorio do programa executado
 		if(strstr(caminho, "\\")!=NULL){
-			setDirectory(caminho);
 			
-			strcat(caminho, nome);
-			printf("%s", caminho);
-			system("pause");
 			ret = pgWriteFile(strlen(txt), txt, caminho);
 			
 			
 			
-		}	
+		}
+		
+		//Caso o arquivo esteja no mesmo diretorio do arquivo de programa executado.	
 		else{
 				ret = pgWriteFile(strlen(txt), txt, nome);
 			
 		}
 		
-		//caso retorne erro
+		//caso retorne erro ao tentar gravar o arquivo
 		if(ret = 0)
 			printf("Failed to created file.");
 			
-		//casso retone sucesso
+		//caso retone sucesso
 		else
 			printf("\nFile created.\nFile Name: 'Formated Fille.txt'.");
 			printf("\nCleaning pointers\n.... ");
@@ -175,6 +216,7 @@ void main(){
 		scanf("%c", &resp);
 		//caso o usuario deseje formatar mais um arquivo, retorna para o inicio da aplicação.
 		if (resp == 'Y' || resp == 'y'){
+			fflush(stdin);
 			main();
 			break;
 		}
@@ -278,6 +320,7 @@ printf("Saved %i bytes", ret);
 	return 0;
 }
 
+//Função que remove o nome do arquivo original da string mantendo apenas o diretorio.
 void setDirectory(char *path){
 	char *p1 = path;
 	char *p2 = &path[strlen(path) - 1];
@@ -290,8 +333,6 @@ void setDirectory(char *path){
 	memset(finalPath, 0, sizeof(finalPath));
 	strncpy(finalPath, p1, p2 - p1);
 	strcat(finalPath, "\\");
-	printf("%s", finalPath);
 	strcpy(path, finalPath);
-	printf("%s", path);
 	system("pause");
 }
